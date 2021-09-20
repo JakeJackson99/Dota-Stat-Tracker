@@ -1,11 +1,17 @@
 from flask import render_template, request, url_for
 import requests
 
-from app import app
+from app import app, cache
 
 URL = 'https://api.opendota.com/api'
 MY_STEAM32_ID = 197033655
-HERO_AMOUNT = 3
+HERO_AMOUNT = 4
+
+
+# TODO
+# account()
+# - check the account name is a valid Steam ID
+#   - handle TypeErrors
 
 
 @app.route('/')
@@ -13,29 +19,23 @@ def index():
     return render_template('index.html')
 
 
-# TODO
-# - check the account name is a valid Steam ID
-#   - handle TypeErrors
-# - gather the information I want for the page, e.g. W/L, rank, etc.
-# - combine all the data into one object and send to 'account.html'
 @app.route('/account', methods=['POST'])
 def account():
     steam_id = request.form['steamID']
 
-    user_data = gather_user_data(steam_id)
-    return render_template('account.html', user_data=user_data)
+    data = gather_user_data(steam_id)
+
+    return render_template('account.html', profile=data['profile'], wl=data['wl'], heroes=data['heroes'])
 
 
+@cache.cached(timeout=0, key_prefix='user_data')
 def gather_user_data(steam_id):
-    user_data = []
+    profile = requests.get('{}/players/{}'.format(URL, steam_id)).json()
+    wl = requests.get('{}/players/{}/wl'.format(URL, steam_id)).json()
+    heroes = format_user_hero_data(requests.get(
+        '{}/players/{}/heroes'.format(URL, steam_id)).json(), HERO_AMOUNT)
 
-    user_data.append(requests.get(
-        '{}/players/{}/wl'.format(URL, steam_id)).json())
-    user_data.append(requests.get(
-        '{}/players/{}'.format(URL, steam_id)).json())
-    user_data.append(format_user_hero_data(requests.get(
-        '{}/players/{}/heroes'.format(URL, steam_id)).json()))
-    return user_data
+    return {'profile': profile, 'wl': wl, 'heroes': heroes}
 
 
 def format_user_hero_data(hero_data, amount=3):
@@ -47,7 +47,6 @@ def format_user_hero_data(hero_data, amount=3):
         dictt["name"] = id_to_name(dictt["hero_id"])
         hero_list.append(dictt)
 
-    hero_list = hero_list[:amount]
     return hero_list
 
 
