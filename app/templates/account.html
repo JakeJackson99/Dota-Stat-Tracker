@@ -47,7 +47,66 @@
         <h3>Recent Matches</h3>
 
 
+
+        <!-- div to contain the content -->
+        <div id="recent_matches" class="mb-3">
+
+            <!-- template schema, hidden from the dom -->
+            <template id="match_template">
+
+                <!-- template content -->
+                <div class="card mb-3 animated fadeIn shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title" id="match_id"></h4>
+                        <span class="text-muted" id="content"></span>
+                    </div>
+                </div>
+
+            </template>
+
+        </div>
+
+        <div class="d-flex justify-content-center mb-3" id="sentinel">
+            <div class="spinner-border" role="status"></div>
+        </div>
+
+
+
     </div>
 
 </div>
+
+<script>
+    var recent_matches = document.querySelector("#recent_matches");
+    var template = document.querySelector("#match_template");
+    var sentinel = document.querySelector("#sentinel");
+
+    function loadRecentMatches() {
+        // the spinner doesn't load more if the loaded amount doesn't push the spinner below the "viewable space", if you get me
+        fetch('https://api.opendota.com/api/players/197033655/matches?limit=2').then(
+            response => response.json()).then((data) => {
+
+                if (!data.length) {
+                    sentinel.innerHTML = "No more matches";
+                    return;
+                }
+
+                for (var i = 0; i < data.length; i++) {
+                    let template_clone = template.content.cloneNode(true);
+                    template_clone.querySelector("#content").innerHTML = data[i]["match_id"];
+                    recent_matches.appendChild(template_clone);
+
+                }
+            })
+    }
+
+    var intersectionObserver = new IntersectionObserver(entries => {
+        if (entries[0].intersectionRatio <= 0) {
+            return;
+        }
+        loadRecentMatches();
+    });
+
+    intersectionObserver.observe(sentinel);
+</script>
 {% endblock %}
