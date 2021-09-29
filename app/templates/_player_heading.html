@@ -1,0 +1,12 @@
+{% set wins = wl["win"] %}
+{% set losses = wl["lose"] %}
+{% set win_percentage = (wins/(wins+losses)) * 100 %}
+
+<div class="col-1">
+    <img src="{{ profile['profile']['avatar'] }}" width="90" height="90" alt="avatar">
+</div>
+
+<div class="col">
+    <h2>{{ profile["profile"]["personaname"] }}</h2>
+    <p>{{ win_percentage|round(2) }}%</p>
+</div>

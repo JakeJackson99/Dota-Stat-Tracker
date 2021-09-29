@@ -1,0 +1,20 @@
+<h3>Most Played Heroes</h3>
+
+{% for hero in heroes %}
+
+{% set hero_wins = hero["win"] %}
+{% set hero_losses = hero["games"] - hero["win"] %}
+{% set hero_win_percent = (hero_wins/(hero_wins+hero_losses)) * 100 %}
+
+<div class="col">
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">{{ hero["name"] }}</h5>
+            <p class="card-text">Wins:{{ hero_wins }} | Losses:{{ hero_losses }} | {{ hero_win_percent|round(2)
+                }}%</p>
+            <p class="card-text"></p>
+        </div>
+    </div>
+</div>
+
+{% endfor %}
