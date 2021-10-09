@@ -7,10 +7,11 @@ from app import cache, URL, HERO_AMOUNT
 # - check that ['tracked_until'] is not null when gathring user data,
 #   such as in static_user_data.
 
+
 @cache.cached(timeout=0, key_prefix='user_hero_list')
 def user_hero_list(steam_id):
     """Returns the user's hero data in a list of dicts
-    
+
     steam_id -- the ID for the user
     """
     return requests.get('{}players/{}/heroes'.format(URL, steam_id)).json()
@@ -56,7 +57,7 @@ def top_heroes(hero_data, amount=3):
 
 def id_to_name(id):
     """Finds the ingame name of a hero given an ID
-    
+
     id -- id of ingame hero
     """
     heroes = hero_list()
@@ -66,5 +67,22 @@ def id_to_name(id):
             return hero["localized_name"]
 
 
-def match_data(matches):
-    pass
+def format_match_data(matches, steam_id):
+    """
+    
+    matches --  
+    """  
+    list = []
+
+    for match in matches:
+
+        dict = {'match_id': match['match_id'], 'duration': match['duration']}
+
+        heroes = match['heroes']
+        for hero in heroes.values():
+            if hero['account_id'] == steam_id:
+                dict['account_id'] = hero['account_id']
+                dict['hero_name'] = id_to_name(str(hero['hero_id']))
+                list.append(dict)
+    
+    return list

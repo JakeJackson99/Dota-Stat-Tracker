@@ -2,38 +2,35 @@ var recent_matches = document.querySelector("#recent_matches");
 var entry = document.querySelector("#entry");
 var sentinel = document.querySelector("#sentinel");
 
-// function loadRecentMatches() {
-//   fetch(
-//     `https://api.opendota.com/api/players/${steam_id}/matches?limit=${results}&offset=${offset}&project=heroes`
-//   )
-//     .then((response) => response.json())
-//     .then((data) => {
-//       if (!data.length) {
-//         sentinel.innerHTML = "No more matches";
-//         return;
-//       }
+const limit = 20;
+var offset = 0; // try let instead of var
 
-//       for (var i = 0; i < data.length; i++) {
-//         let new_entry = entry.cloneNode(true);
 
-//         var hero = getUserHero(data[i]["heroes"]);
-//         var result = 0;
-//         var duration = 0;
-//         var kda = 0;
+function loadRecentMatches() {
+  fetch(`/recent_matches?limit=${limit}&offset=${offset}`)
+    .then((res) => res.json())
+    .then((data) => {
+      
+      if (!data.length) {
+        sentinel.innerHTML = "No more matches";
+        return;
+      }
 
-//         new_entry.querySelector("#hero").innerHTML = hero.hero_id;
-//         new_entry.querySelector("#result").innerHTML = result;
-//         new_entry.querySelector("#duration").innerHTML = duration;
-//         new_entry.querySelector("#kda").innerHTML = kda;
+      for (var i = 0; i < data.length; i++) {
+        let new_entry = entry.cloneNode(true);
 
-//         recent_matches.appendChild(new_entry);
-//       }
-//       offset = offset + results_num;
-//     });
-//     offset = offset + results;
-// }
+        new_entry.querySelector("#hero").innerHTML = data[i]['hero_name'];
+        new_entry.querySelector("#result").innerHTML = "N/A";
+        new_entry.querySelector("#duration").innerHTML = data[i]['duration'];
+        new_entry.querySelector("#kda").innerHTML = "N/A";
 
-// fetch from server using anon function
+        recent_matches.appendChild(new_entry);
+      }
+
+
+      offset += limit;
+    });
+}
 
 var intersectionObserver = new IntersectionObserver((entries) => {
   if (entries[0].intersectionRatio <= 0) {

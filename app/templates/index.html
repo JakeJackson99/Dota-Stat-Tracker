@@ -4,11 +4,9 @@
 
 <div class="container m-5">
     <form action="{{ url_for('account') }}" method="post" class="d-flex">
-        <input placeholder="197033655" name="steamID" class="form-control me-2" type="search" aria-label="Search">
+        <input value="197033655" name="steamID" class="form-control me-2" type="search" aria-label="Search" required>
         <button class="btn btn-outline-dark" type="submit">Submit</button>
     </form>
 </div>
-
-197033655
 
 {% endblock %}
