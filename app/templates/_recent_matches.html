@@ -6,14 +6,18 @@
         <th scope="col">Result</th>
         <th scope="col">Duration</th>
         <th scope="col">KDA</th>
+        <th scope="col"></th>        
     </thead>
     <tbody id="recent_matches">
-        <tr id="entry">
-            <th id="hero"></th>
-            <th id="result"></th>
-            <th id="duration"></th>
-            <th id="kda"></th>
-        </tr>
+        <a href="{{ url_for('index') }}">
+            <tr id="entry">
+                <th id="hero"></th>
+                <th id="result"></th>
+                <th id="duration"></th>
+                <th id="kda"></th>
+                <th id="view_game"></th>    <!-- <a href="{{ url_for('index') }}">View</a> -->
+            </tr>
+        </a>
     </tbody>
 </table>
 

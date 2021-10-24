@@ -1,9 +1,8 @@
 import requests
 from flask import render_template, request, request, session, jsonify
-from app import app, URL
+from app import app
 from app.util import format_match_data, static_user_data
-
-steam_id1 = 197033655
+from app.static_data import URL
 
 
 @app.route('/')
@@ -33,6 +32,15 @@ def recent_matches():
     offset = request.args.get('offset')
     steam_id = session.get('steam_id')
 
-    matches = requests.get('{}players/{}/matches?limit={}&offset={}&project=heroes'.format(URL, steam_id, limit, offset)).json()
+    matches = requests.get(
+        '{}players/{}/matches?limit={}&offset={}&project=heroes'.format(URL, steam_id, limit, offset)).json()
 
-    return jsonify(format_match_data(matches, steam_id1))
+    return jsonify(format_match_data(matches, steam_id))
+
+
+@app.route('/match/<match_id>')
+def match(match_id):
+    # match = get_match_details()
+    match = "hello"
+
+    return render_template('match.html', match=match)

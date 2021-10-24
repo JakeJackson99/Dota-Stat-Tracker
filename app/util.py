@@ -1,11 +1,20 @@
 import requests
-from app import cache, URL, HERO_AMOUNT
+from app import cache
+from app.static_data import HERO_BY_ID, URL, HERO_AMOUNT
 
 # TODO
 # - create a def to fetch the list of heroes for the user and cache it;
 #   - this is to be used in static_user_data, id_to_name & in recent_matches.
 # - check that ['tracked_until'] is not null when gathring user data,
 #   such as in static_user_data.
+
+
+def id_to_name(id):
+    """Finds the ingame name of a hero given an ID
+
+    id -- id of ingame hero
+    """
+    return HERO_BY_ID.get(int(id))
 
 
 @cache.cached(timeout=0, key_prefix='user_hero_list')
@@ -20,7 +29,7 @@ def user_hero_list(steam_id):
 @cache.cached(timeout=0, key_prefix='hero_list')
 def hero_list():
     """Returns all static hero data in a list of dicts"""
-    return requests.get('https://api.opendota.com/api/heroes').json()
+    return requests.get('{}heroes'.format(URL)).json()
 
 
 @cache.cached(timeout=0, key_prefix='static_user_data')
@@ -30,11 +39,8 @@ def static_user_data(steam_id):
     steam_id -- the ID for the user
     """
     profile = requests.get('{}players/{}'.format(URL, steam_id)).json()
-
     wl = requests.get('{}players/{}/wl'.format(URL, steam_id)).json()
-
     heroes = top_heroes(user_hero_list(steam_id), HERO_AMOUNT)
-
     return {'profile': profile, 'wl': wl, 'heroes': heroes}
 
 
@@ -46,43 +52,34 @@ def top_heroes(hero_data, amount=3):
     """
     hero_list = []
     keys = ["hero_id", "games", "win"]
-
     for hero in hero_data[:amount]:
         dictt = {key: value for key, value in hero.items() if key in keys}
         dictt["name"] = id_to_name(dictt["hero_id"])
         hero_list.append(dictt)
-
     return hero_list
-
-
-def id_to_name(id):
-    """Finds the ingame name of a hero given an ID
-
-    id -- id of ingame hero
-    """
-    heroes = hero_list()
-
-    for hero in heroes:
-        if id == str(hero["id"]):
-            return hero["localized_name"]
 
 
 def format_match_data(matches, steam_id):
     """
-    
+
     matches --  
-    """  
+    """
     list = []
-
     for match in matches:
-
         dict = {'match_id': match['match_id'], 'duration': match['duration']}
-
         heroes = match['heroes']
         for hero in heroes.values():
-            if hero['account_id'] == steam_id:
+            if hero['account_id'] == int(steam_id):
                 dict['account_id'] = hero['account_id']
-                dict['hero_name'] = id_to_name(str(hero['hero_id']))
+                dict['hero_name'] = id_to_name(hero['hero_id'])
+                scores = match_result(dict['match_id'])
+                dict['radiant_score'] = scores.get('radiant_score')
+                dict['dire_score'] = scores.get('dire_score')
                 list.append(dict)
-    
+    #print(list)
     return list
+
+
+def match_result(match_id):
+    match = requests.get('{}/matches/{}'.format(URL, match_id)).json()
+    return {'radiant_score': match.get('radiant_score'), 'dire_score': match.get('dire_score')}
