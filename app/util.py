@@ -23,13 +23,13 @@ def user_hero_list(steam_id):
 
     steam_id -- the ID for the user
     """
-    return requests.get('{}players/{}/heroes'.format(URL, steam_id)).json()
+    return requests.get(f'{URL}players/{steam_id}/heroes').json()
 
 
 @cache.cached(timeout=0, key_prefix='hero_list')
 def hero_list():
     """Returns all static hero data in a list of dicts"""
-    return requests.get('{}heroes'.format(URL)).json()
+    return requests.get(f'{URL}heroes').json()
 
 
 @cache.cached(timeout=0, key_prefix='static_user_data')
@@ -38,8 +38,8 @@ def static_user_data(steam_id):
 
     steam_id -- the ID for the user
     """
-    profile = requests.get('{}players/{}'.format(URL, steam_id)).json()
-    wl = requests.get('{}players/{}/wl'.format(URL, steam_id)).json()
+    profile = requests.get(f'{URL}players/{steam_id}').json()
+    wl = requests.get(f'{URL}players/{steam_id}/wl').json()
     heroes = top_heroes(user_hero_list(steam_id), HERO_AMOUNT)
     return {'profile': profile, 'wl': wl, 'heroes': heroes}
 
@@ -60,9 +60,10 @@ def top_heroes(hero_data, amount=3):
 
 
 def format_match_data(matches, steam_id):
-    """
+    """Formats the necessary data for recent matches. 
 
-    matches --  
+    matches -- a list of matches
+    steam_id -- the ID for the user
     """
     list = []
     for match in matches:
@@ -76,10 +77,17 @@ def format_match_data(matches, steam_id):
                 dict['radiant_score'] = scores.get('radiant_score')
                 dict['dire_score'] = scores.get('dire_score')
                 list.append(dict)
-    #print(list)
     return list
 
 
 def match_result(match_id):
-    match = requests.get('{}/matches/{}'.format(URL, match_id)).json()
+    match = requests.get(f'{URL}/matches/{match_id}').json()
     return {'radiant_score': match.get('radiant_score'), 'dire_score': match.get('dire_score')}
+
+
+def get_match_details(match_id):
+    """Returns the details for a single match.
+    
+    match_id -- the identifier for the match
+    """
+    pass

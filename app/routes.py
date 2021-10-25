@@ -33,14 +33,13 @@ def recent_matches():
     steam_id = session.get('steam_id')
 
     matches = requests.get(
-        '{}players/{}/matches?limit={}&offset={}&project=heroes'.format(URL, steam_id, limit, offset)).json()
+        f'{URL}players/{steam_id}/matches?limit={limit}&offset={offset}&project=heroes').json()
 
     return jsonify(format_match_data(matches, steam_id))
 
 
 @app.route('/match/<match_id>')
 def match(match_id):
-    # match = get_match_details()
-    match = "hello"
+    match = requests.get(f'{URL}matches/{match_id}').json()
 
     return render_template('match.html', match=match)
